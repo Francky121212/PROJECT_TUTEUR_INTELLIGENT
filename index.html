@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTutor AI – Tuteur Éducatif Personnalisé</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --cream: #FBF8F3;
+            --dark-blue: #1e3a5f;
+            --accent-purple: #8b5cf6;
+            --light-blue: #3b82f6;
+            --warm-gray: #4A4A4A;
+            --light-purple: #ede9fe;
+            --mint: #d1fae5;
+            --coral: #f87171;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, var(--light-purple) 100%);
+            color: var(--dark-blue);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Décoration de fond */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -20%;
+            width: 80%;
+            height: 120%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-50px, 50px) rotate(5deg); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 30px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            color: var(--dark-blue);
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--warm-gray);
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        /* Main Card */
+        .card {
+            background: white;
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 
+                0 10px 60px rgba(30, 58, 95, 0.08),
+                0 0 0 1px rgba(30, 58, 95, 0.05);
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 35px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .card {
+                padding: 30px;
+            }
+        }
+
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 35px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--dark-blue);
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            letter-spacing: 0.3px;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            color: var(--accent-purple);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 18px 24px;
+            border: 2px solid rgba(30, 58, 95, 0.1);
+            border-radius: 16px;
+            font-size: 1rem;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--cream);
+        }
+
+        .input-with-icon input,
+        .input-with-icon select {
+            padding-left: 55px;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Duration Slider */
+        .duration-display {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .duration-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .duration-label {
+            font-size: 0.9rem;
+            color: var(--warm-gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: linear-gradient(to right, var(--light-blue) 0%, var(--accent-purple) 100%);
+            outline: none;
+            -webkit-appearance: none;
+            margin: 10px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--dark-blue);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--dark-blue);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        /* Topics Tags */
+        .topics-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .topic-tag {
+            padding: 12px 20px;
+            background: var(--light-purple);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: var(--dark-blue);
+        }
+
+        .topic-tag:hover {
+            background: var(--accent-purple);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .topic-tag.selected {
+            background: var(--accent-purple);
+            color: white;
+            border-color: var(--accent-purple);
+        }
+
+        /* Custom Topic Input */
+        .custom-topic {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .custom-topic input {
+            flex: 1;
+        }
+
+        .custom-topic button {
+            padding: 18px 30px;
+            background: var(--light-blue);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .custom-topic button:hover {
+            background: var(--accent-purple);
+            transform: translateY(-2px);
+        }
+
+        /* Generate Button */
+        .generate-btn {
+            width: 100%;
+            padding: 22px;
+            background: linear-gradient(135deg, var(--light-blue) 0%, var(--accent-purple) 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.4);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 60px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid var(--light-purple);
+            border-top: 5px solid var(--accent-purple);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Results Section */
+        .results {
+            display: none;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .result-header {
+            background: linear-gradient(135deg, var(--light-blue) 0%, var(--accent-purple) 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .result-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .result-meta {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .meta-icon {
+            font-size: 1.5rem;
+        }
+
+        .lesson-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            line-height: 1.8;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .lesson-content h2 {
+            color: var(--accent-purple);
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        .lesson-content h3 {
+            color: var(--light-blue);
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .lesson-content ul, .lesson-content ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        .lesson-content li {
+            margin-bottom: 8px;
+        }
+
+        .lesson-content code {
+            background: var(--light-purple);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .lesson-content pre {
+            background: var(--light-purple);
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 14px 28px;
+            border: 2px solid var(--accent-purple);
+            background: white;
+            color: var(--accent-purple);
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--accent-purple);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Error Message */
+        .error-message {
+            display: none;
+            background: var(--coral);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .error-message.active {
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Info Box */
+        .info-box {
+            background: var(--mint);
+            border-left: 4px solid var(--light-blue);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .info-box h3 {
+            color: var(--dark-blue);
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>📚 EduTutor AI</h1>
+            <p class="subtitle">Votre tuteur éducatif personnalisé alimenté par l'IA</p>
+        </header>
+
+        <!-- Main Form Card -->
+        <div class="card">
+            <div class="info-box">
+                <h3>🎯 Apprentissage Personnalisé</h3>
+                <p>Créez des leçons sur mesure adaptées à votre niveau et à votre style d'apprentissage. Notre IA génère du contenu pédagogique engageant et structuré.</p>
+            </div>
+
+            <div id="errorMsg" class="error-message"></div>
+
+            <form id="tutorForm">
+                <div class="form-grid">
+                    <!-- Sujet -->
+                    <div class="form-group">
+                        <label for="subject">📖 Sujet d'étude</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📚</span>
+                            <input type="text" id="subject" placeholder="Ex: Mathématiques, Français, Sciences..." required>
+                        </div>
+                    </div>
+
+                    <!-- Niveau -->
+                    <div class="form-group">
+                        <label for="level">🎓 Niveau scolaire</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📊</span>
+                            <select id="level" required>
+                                <option value="">Sélectionner un niveau</option>
+                                <option value="Maternelle">Maternelle</option>
+                                <option value="Primaire">Primaire (CP-CM2)</option>
+                                <option value="Collège">Collège (6e-3e)</option>
+                                <option value="Lycée">Lycée (2nde-Terminale)</option>
+                                <option value="Université">Université / Supérieur</option>
+                                <option value="Formation professionnelle">Formation professionnelle</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Style d'apprentissage -->
+                    <div class="form-group">
+                        <label for="learningStyle">🧠 Style d'apprentissage</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">🎨</span>
+                            <select id="learningStyle" required>
+                                <option value="">Sélectionner un style</option>
+                                <option value="Visuel">Visuel (diagrammes, schémas)</option>
+                                <option value="Auditif">Auditif (explications, analogies)</option>
+                                <option value="Kinesthésique">Kinesthésique (pratique, expériences)</option>
+                                <option value="Lecture/Écriture">Lecture/Écriture (textes, notes)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Modèle IA -->
+                    <div class="form-group">
+                        <label for="model">🤖 Modèle IA</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">⚙️</span>
+                            <select id="model">
+                                <option value="gpt-oss:120b-cloud">GPT-OSS 120B (Recommandé)</option>
+                                <option value="llama2:7b">Llama 2 7B</option>
+                                <option value="gemma:7b">Gemma 7B</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Durée de la session -->
+                <div class="form-group full-width">
+                    <label for="duration">⏱️ Durée de la session</label>
+                    <div class="duration-display">
+                        <div class="duration-value" id="durationDisplay">60 min</div>
+                        <div class="duration-label">Durée estimée de la leçon</div>
+                    </div>
+                    <input type="range" id="duration" min="15" max="180" step="15" value="60">
+                </div>
+
+                <!-- Thèmes à couvrir -->
+                <div class="form-group full-width">
+                    <label>🎯 Thèmes à couvrir</label>
+                    <div id="topicsContainer" class="topics-container">
+                        <!-- Les thèmes seront ajoutés dynamiquement selon le sujet -->
+                    </div>
+                    <div class="custom-topic">
+                        <input type="text" id="customTopic" placeholder="Ajouter un thème personnalisé...">
+                        <button type="button" id="addTopicBtn">➕ Ajouter</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="generate-btn" id="generateBtn">
+                    🚀 Générer ma leçon personnalisée
+                </button>
+            </form>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading card">
+            <div class="spinner"></div>
+            <h3>🧠 Création de votre leçon personnalisée...</h3>
+            <p>Notre IA prépare du contenu adapté à votre profil d'apprentissage</p>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="results">
+            <div class="card">
+                <div class="result-header">
+                    <h2 class="result-title" id="resultTitle">Votre leçon</h2>
+                    <div class="result-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">📚</span>
+                            <div>
+                                <strong>Sujet:</strong>
+                                <div id="metaSubject"></div>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">⏱️</span>
+                            <div>
+                                <strong>Durée:</strong>
+                                <div id="metaDuration"></div>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">🧠</span>
+                            <div>
+                                <strong>Style:</strong>
+                                <div id="metaStyle"></div>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">🎯</span>
+                            <div>
+                                <strong>Thèmes:</strong>
+                                <div id="metaTopics"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-content" id="lessonContent">
+                    <!-- Le contenu de la leçon sera inséré ici -->
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="copyLesson()">📋 Copier</button>
+                    <button class="action-btn" onclick="downloadLesson()">💾 Télécharger</button>
+                    <button class="action-btn" onclick="window.print()">🖨️ Imprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // État de l'application
+        const state = {
+            selectedTopics: new Set(),
+            currentLesson: ''
+        };
+
+        // Thèmes prédéfinis par sujet
+        const topicsBySubject = {
+            'mathématiques': ['Algèbre', 'Géométrie', 'Analyse', 'Probabilités', 'Statistiques', 'Arithmétique'],
+            'français': ['Grammaire', 'Orthographe', 'Conjugaison', 'Littérature', 'Expression écrite', 'Vocabulaire'],
+            'sciences': ['Physique', 'Chimie', 'Biologie', 'Sciences de la Terre', 'Écologie', 'Astronomie'],
+            'histoire': ['Antiquité', 'Moyen Âge', 'Renaissance', 'Époque moderne', 'Époque contemporaine', 'Histoire locale'],
+            'géographie': ['Cartographie', 'Géographie physique', 'Géographie humaine', 'Géopolitique', 'Environnement', 'Mondialisation'],
+            'anglais': ['Grammaire', 'Vocabulaire', 'Conversation', 'Compréhension écrite', 'Expression écrite', 'Prononciation'],
+            'philosophie': ['Métaphysique', 'Éthique', 'Logique', 'Épistémologie', 'Philosophie politique', 'Esthétique'],
+            'informatique': ['Programmation', 'Algorithmique', 'Bases de données', 'Réseaux', 'Sécurité', 'Web'],
+            'physique': ['Mécanique', 'Électricité', 'Optique', 'Thermodynamique', 'Physique quantique', 'Relativité'],
+            'chimie': ['Chimie organique', 'Chimie minérale', 'Thermochimie', 'Cinétique chimique', 'Électrochimie', 'Chimie analytique']
+        };
+
+        // Éléments DOM
+        const form = document.getElementById('tutorForm');
+        const generateBtn = document.getElementById('generateBtn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const errorMsg = document.getElementById('errorMsg');
+        const topicsContainer = document.getElementById('topicsContainer');
+        const customTopicInput = document.getElementById('customTopic');
+        const addTopicBtn = document.getElementById('addTopicBtn');
+        const durationSlider = document.getElementById('duration');
+        const durationDisplay = document.getElementById('durationDisplay');
+        const subjectInput = document.getElementById('subject');
+
+        // Mise à jour de la durée en temps réel
+        durationSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            durationDisplay.textContent = `${value} min`;
+        });
+
+        // Mettre à jour les thèmes selon le sujet
+        subjectInput.addEventListener('blur', () => {
+            updateTopics();
+        });
+
+        function updateTopics() {
+            const subject = subjectInput.value.trim().toLowerCase();
+            let topics = topicsBySubject[subject] || ['Fondamentaux', 'Théorie', 'Pratique', 'Exercices', 'Applications'];
+            
+            topicsContainer.innerHTML = '';
+            state.selectedTopics.clear();
+            
+            topics.forEach(topic => {
+                const tag = document.createElement('div');
+                tag.className = 'topic-tag';
+                tag.dataset.topic = topic;
+                tag.textContent = topic;
+                topicsContainer.appendChild(tag);
+            });
+        }
+
+        // Initialiser avec des thèmes par défaut
+        updateTopics();
+
+        // Gestion des tags de thèmes
+        topicsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('topic-tag')) {
+                const topic = e.target.dataset.topic;
+                e.target.classList.toggle('selected');
+                
+                if (state.selectedTopics.has(topic)) {
+                    state.selectedTopics.delete(topic);
+                } else {
+                    state.selectedTopics.add(topic);
+                }
+            }
+        });
+
+        // Ajouter un thème personnalisé
+        addTopicBtn.addEventListener('click', () => {
+            const customTopic = customTopicInput.value.trim();
+            if (customTopic) {
+                const tag = document.createElement('div');
+                tag.className = 'topic-tag selected';
+                tag.dataset.topic = customTopic;
+                tag.textContent = `✨ ${customTopic}`;
+                topicsContainer.appendChild(tag);
+                
+                state.selectedTopics.add(customTopic);
+                customTopicInput.value = '';
+            }
+        });
+
+        // Permettre d'ajouter avec Enter
+        customTopicInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addTopicBtn.click();
+            }
+        });
+
+        // Soumettre le formulaire
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Récupérer les données
+            const subject = document.getElementById('subject').value.trim();
+            const level = document.getElementById('level').value;
+            const learningStyle = document.getElementById('learningStyle').value;
+            const duration = parseInt(durationSlider.value);
+            const model = document.getElementById('model').value;
+            const topics = Array.from(state.selectedTopics);
+
+            // Validation
+            if (!subject) {
+                showError('Veuillez entrer un sujet d\'étude');
+                return;
+            }
+
+            if (!level) {
+                showError('Veuillez sélectionner un niveau');
+                return;
+            }
+
+            if (!learningStyle) {
+                showError('Veuillez sélectionner un style d\'apprentissage');
+                return;
+            }
+
+            if (topics.length === 0) {
+                showError('Veuillez sélectionner au moins un thème');
+                return;
+            }
+
+            // Afficher le loading
+            hideError();
+            results.classList.remove('active');
+            loading.classList.add('active');
+            generateBtn.disabled = true;
+
+            try {
+                // Appeler l'API
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        subject,
+                        level,
+                        learning_style: learningStyle,
+                        topics,
+                        duration,
+                        model
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    showError(data.error || 'Une erreur est survenue');
+                }
+            } catch (error) {
+                showError('Impossible de se connecter au serveur. Assurez-vous que le backend est démarré.');
+                console.error('Erreur:', error);
+            } finally {
+                loading.classList.remove('active');
+                generateBtn.disabled = false;
+            }
+        });
+
+        // Afficher les résultats avec style
+        function displayResults(data) {
+            state.currentLesson = data.lesson;
+            
+            document.getElementById('resultTitle').textContent = `Leçon: ${data.subject}`;
+            document.getElementById('metaSubject').textContent = data.subject;
+            document.getElementById('metaDuration').textContent = `${data.duration} minutes`;
+            document.getElementById('metaStyle').textContent = data.learning_style;
+            document.getElementById('metaTopics').textContent = data.topics.slice(0, 2).join(', ') + (data.topics.length > 2 ? '...' : '');
+            
+            // Formatter la leçon avec Markdown
+            const formatted = marked.parse(data.lesson);
+            document.getElementById('lessonContent').innerHTML = formatted;
+            
+            results.classList.add('active');
+            results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Copier la leçon
+        function copyLesson() {
+            navigator.clipboard.writeText(state.currentLesson).then(() => {
+                alert('✅ Leçon copiée dans le presse-papiers !');
+            });
+        }
+
+        // Télécharger la leçon
+        function downloadLesson() {
+            const blob = new Blob([state.currentLesson], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `lecon-${document.getElementById('subject').value}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Afficher une erreur
+        function showError(message) {
+            errorMsg.textContent = message;
+            errorMsg.classList.add('active');
+            setTimeout(() => {
+                hideError();
+            }, 5000);
+        }
+
+        // Masquer l'erreur
+        function hideError() {
+            errorMsg.classList.remove('active');
+        }
+    </script>
+</body>
+</html>
